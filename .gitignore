@@ -1,0 +1,66 @@
+# .NET Core build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.vspscc
+*.vssscc
+*.suo
+*.userosscache
+*.sln.docstates
+*.vsidx
+
+# Logs
+*.log
+logs/
+
+# Visual Studio Code
+.vscode/
+
+# VS
+.vs/
+
+# Rider
+.idea/
+
+# ASP.NET Core environment files
+appsettings.*.json
+secrets.json
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# Temporary files
+*.tmp
+*.temp
+*.pid
+*.swp
+*.swo
+
+# Database files
+*.mdf
+*.ldf
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Resharper
+_ReSharper.Caches/
+
+# Coverage output
+coverage/
+*.coverage
+*.coveragexml
+*.codecov
+
+# NPM package lock
+package-lock.json
+yarn.lock
+
+# JetBrains Rider
+.idea/
+*.sln.iml

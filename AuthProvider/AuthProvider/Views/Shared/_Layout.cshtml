@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AuthProvider</title>
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    @RenderSection("Styles", required: false)
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col text-gray-900">
+
+    <header class="bg-white border-b border-gray-200 shadow-sm">
+        <nav class="container mx-auto flex justify-between items-center px-6 py-4">
+            <a asp-area="" asp-controller="Home" asp-action="Index"
+               class="text-xl font-bold text-indigo-600 hover:text-indigo-700 transition">
+                AuthProvider
+            </a>
+
+            <div class="flex gap-6 items-center text-sm font-medium">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="text-gray-600 hover:text-indigo-600 transition">Home</a>
+
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="text-gray-600 hover:text-indigo-600 transition">Profile</a>
+                    <form class="inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                        <button type="submit" class="text-gray-500 hover:text-red-600 transition">Sign out</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login"
+                       class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        Sign in
+                    </a>
+                }
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-1 flex flex-col bg-iam-circuit">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-white border-t border-gray-200">
+        <div class="container mx-auto px-6 py-4 text-center text-sm text-gray-500">
+            © @DateTime.Now.Year - AuthProvider Identity Solutions
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
