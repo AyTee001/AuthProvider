@@ -1,0 +1,50 @@
+@startuml name "Sequence_OIDC"
+title "OpenID Connect Authorization Code Flow для клієнт-серверного додатку"
+
+actor "Користувач" as User
+participant "Користувацький\nагент (з PWA, SPA тощо)" as UserAgent
+participant "Клієнт\n(серверна частина)" as Client
+participant "Сервер авторизації\n(Authorization server / OP)" as OP
+
+autonumber
+
+== 1. Ініціація процесу автентифікації ==
+User -> UserAgent: Ініціює логін
+UserAgent -> Client: Запит на логін
+Client -> OP: Запит автентифікації\nна /connect/authorize
+activate OP
+OP --> UserAgent: Редирект на сторінку\nавтентифікації (302)
+deactivate OP
+
+== 2. Автентифікація користувача ==
+UserAgent -> OP: Перехід на сторінку логіну
+OP --> UserAgent: Показ сторінку автентифікації
+note left of OP
+  Сервер авторизації
+  може додатково просити
+  користувача про
+  надання дозволів, якщо вони
+  не входять до стандартних
+end note
+User -> UserAgent: Заповнення\nоблікових даних
+UserAgent -> OP: Надсилання облікових даних
+activate OP
+OP -> OP: Обробка облікових даних,\nстворення сесії
+OP -> UserAgent: Встановлення session cookie,\n редирект назад на /connect/authorize
+deactivate OP
+
+== 3. Отримання коду авторизації ==
+UserAgent -> OP: Слідування редиркту, \nз переходом на /connect/authorize (with cookie)
+activate OP
+OP -> OP: Перевірка сесії\nавтентифікації
+OP --> Client: Редирект на клієнт\nз кодом авторизації (302)
+deactivate OP
+
+== 4. Обмін коду на токени ==
+Client -> OP: Запит на токен до /connect/token\nз кодом авторизації
+activate OP
+OP -> OP: Валідація коду,\nгенерація токенів
+OP --> Client: access_token + id_token\n+ refresh_token
+deactivate OP
+
+@enduml

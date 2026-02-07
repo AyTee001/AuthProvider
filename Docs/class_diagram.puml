@@ -1,0 +1,128 @@
+@startuml "Class Diagram"
+
+' ----------------------
+' Layout & Style
+' ----------------------
+left to right direction
+skinparam linetype ortho
+' Invisible lines to force groups
+' ----------------------
+
+' --- Data Layer (Identity) ---
+class "IdentityDbContext<TUser>" as IdentityDbContext <<framework>>
+class IdentityUser <<framework>>
+
+class AuthProviderDbContext {
+    +AuthProviderDbContext(options: DbContextOptions)
+    #OnModelCreating(builder: ModelBuilder): void
+}
+
+class ApplicationUser
+
+IdentityDbContext <|-- AuthProviderDbContext
+IdentityUser <|-- ApplicationUser
+AuthProviderDbContext "1" --> "1" ApplicationUser : manages >
+
+' Invisible anchors for layout
+IdentityDbContext -[hidden]-> ApplicationUser
+
+' --- Controllers ---
+class Controller <<framework>>
+
+class AuthorizationController {
+    +Authorize(): Task<IActionResult>
+    +Accept(): Task<IActionResult>
+    +Deny(): IActionResult
+    +Logout(): IActionResult
+    +LogoutPost(): Task<IActionResult>
+    +Exchange(): Task<IActionResult>
+    -CreateIdentityWithClaims(): Task<ClaimsIdentity>
+    -MustForceAuthentication(): bool
+}
+
+class HomeController {
+    +Index(): IActionResult
+    +Error(): IActionResult
+}
+
+Controller <|-- AuthorizationController
+Controller <|-- HomeController
+
+HomeController ..> ErrorViewModel
+
+' --- Models & ViewModels ---
+class AuthorizeViewModel <<ViewModel>> {
+    +ApplicationName: string
+    +Scope: string
+}
+
+class ErrorViewModel <<ViewModel>> {
+    +RequestId: string
+    +ShowRequestId: bool {readOnly}
+}
+
+' Invisible layout control
+AuthorizeViewModel -[hidden]-> ErrorViewModel
+
+' --- Identity Pages ---
+class PageModel <<framework>>
+
+class LoginModel {
+    +Input: InputModel
+    +OnGetAsync(): Task
+    +OnPostAsync(): Task<IActionResult>
+}
+
+class RegisterModel {
+    +Input: InputModel
+    +OnGetAsync(): Task
+    +OnPostAsync(): Task<IActionResult>
+}
+
+class IndexModel {
+    +Input: InputModel
+    +OnGetAsync(): Task<IActionResult>
+}
+
+PageModel <|-- LoginModel
+PageModel <|-- RegisterModel
+PageModel <|-- IndexModel
+
+' --- Nested Input Models ---
+class "LoginModel::InputModel" as LoginInput <<ViewModel>> {
+    +Email: string
+    +Password: string
+}
+
+class "RegisterModel::InputModel" as RegisterInput <<ViewModel>> {
+    +Email: string
+    +Password: string
+    +ConfirmPassword: string
+}
+
+LoginModel *-- LoginInput
+RegisterModel *-- RegisterInput
+
+' Invisible layout control
+LoginInput -[hidden]-> RegisterInput
+
+' --- Infrastructure / Workers ---
+interface IHostedService <<framework>>
+
+class SeedWorker {
+    +StartAsync(): Task
+    +StopAsync(): Task
+}
+
+IHostedService <|-- SeedWorker
+SeedWorker ..> AuthProviderDbContext
+
+' --- Custom MVC Attributes ---
+class ActionMethodSelectorAttribute <<framework>>
+class FormValueAttribute {
+    +IsValidForRequest(): bool
+}
+
+ActionMethodSelectorAttribute <|-- FormValueAttribute
+
+@enduml
