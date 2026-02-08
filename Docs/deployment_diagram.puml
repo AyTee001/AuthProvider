@@ -2,35 +2,43 @@
 title "Діаграма розгортання"
 
 skinparam componentStyle uml2
+skinparam nodesep 180
 
 node "Google Cloud Platform (GCP)" as GCP {
     
     node "Cloud Run (Serverless)" {
-        node "Client App" as CloudRunClient <<service>>{
-            component "Client Container\n(MVC app)" as ClientInstance
+        node "Client Service" <<service>> {
+            node "Docker Container (Linux-based)" as LinuxClient <<execution environment>> {
+               component "ASP.NET Core MVC\n(Client App)" as ClientInstance
+            }
+        }
+        node "Auth Service" <<service>> {
+            node "Docker Container (Linux-based)" as LinuxAuth <<execution environment>> {
+               component "ASP.NET Core Identity\n(OpenIddict Server)" as AuthInstance
+            }
         }
         
-        node "Auth Server" as CloudRunAuth <<service>>{
-            component "Auth Server Container\n(OpenIddict)" as AuthInstance
+        node "Resource Service" <<service>> {
+             node "Docker Container (Linux-based)" as LinuxApi <<execution environment>> {
+               component "ASP.NET Core Web API\n(Resource Server)" as ApiInstance
+            }
         }
-        
-        node "Resource API" as CloudRunApi <<service>> {
-            component "API Container\n(Resource Server)" as ApiInstance
-        }
-    }
 
-    database "Cloud SQL\n(SQL Server)" as CloudSQL
+        AuthInstance -[hidden]right- ApiInstance
+    }
 }
+
+database "Cloud SQL\n(SQL Server)" as CloudSQL
 
 node "End User" as UserNode {
     agent "Web Browser" as Browser
 }
 
-Browser --> ClientInstance : "HTTPS"
-ClientInstance --> AuthInstance : "OIDC Auth (HTTPS)"
-ClientInstance --> ApiInstance : "API Calls (HTTPS)"
+Browser --> ClientInstance : "HTTPS (443)"
+ClientInstance --> AuthInstance : "HTTPS (443)"
+ClientInstance --> ApiInstance : "HTTPS (443)"
 
-AuthInstance --> CloudSQL : "SQL Connection\n(EF Core)"
-ApiInstance --> CloudRunAuth : "Key Retrieval (JWKS)\n(HTTPS)"
+AuthInstance --> CloudSQL : "TCP/IP (1433)"
+ApiInstance --> AuthInstance : "HTTPS (443)"
 
 @enduml
