@@ -52,6 +52,6 @@ ApiInterface -- ResourceControllers
 
 OpenIddictValidation --> DiscoveryInterface : "Signing Keys (JWKS)"
 
-EfCore ..left..> DB : "CRUD операції"
+EfCore .> DB : "CRUD операції"
 
 @enduml
