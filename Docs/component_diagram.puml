@@ -1,0 +1,49 @@
+@startuml "Component Diagram"
+title Діаграма компонентів системи автентифікації/авторизації
+
+skinparam componentStyle uml2
+
+component "Клієнтський додаток (MVC)" as Client {
+    component "OpenIddict Client Services" as OpenIddictClient
+}
+
+component "Сервер авторизації" as AuthServer {
+    component "Identity Management UI" as IdentityUI
+    component "Authorization Controller" as AuthController
+    component "Discovery endpoints" as DiscoveryEndpoints
+    component "OpenIddict Server Services" as OpenIddictServer
+    component "ASP.NET Core Identity Services" as IdentityCore
+
+    AuthController ..> OpenIddictServer : "Опрацювання запитів"
+    AuthController ..> IdentityCore : "Отримання інформації про користувача"
+    IdentityUI ..> IdentityCore : "Управління ідентичністю користувача"
+    DiscoveryEndpoints ..> OpenIddictServer : "Імплементація"
+}
+
+component "Сервер ресурсів (API)" as ResourceServer {
+    component "Request Middleware" as RequestMiddleware
+    component "OpenIddict Validation Services" as OpenIddictValidation
+    component "Resource Controllers" as ResourceControllers
+
+    RequestMiddleware ..> OpenIddictValidation : "Валідація токенів"
+    ResourceControllers ..> RequestMiddleware : "Захищається"
+}
+
+database "SQL Database" as DB
+
+OpenIddictServer ..> DB : "Запис даних для автентифікації та авторизації"
+IdentityCore ..> DB : "Запис облікових даних користувачів"
+
+interface "OIDC Protocol endpoints" as OidcInterface
+AuthServer -up- OidcInterface
+Client ..> OidcInterface : "Взаємодія через OIDC / OAuth 2.0"
+
+interface "Discovery (.well-known)" as DiscoveryInterface
+AuthServer -- DiscoveryInterface
+OpenIddictValidation ..> DiscoveryInterface : "Отримання Signing Keys (JWKS)"
+
+interface "REST API\n(Data Access)" as ApiInterface
+ResourceServer -up- ApiInterface
+Client ..> ApiInterface : "Запит з Access token"
+
+@enduml
