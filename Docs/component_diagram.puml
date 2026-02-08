@@ -2,6 +2,7 @@
 title Діаграма компонентів системи автентифікації/авторизації
 
 skinparam componentStyle uml2
+skinparam linetype ortho
 
 component "Клієнтський додаток (MVC)" as Client {
     component "OpenIddict Client Services" as OpenIddictClient
@@ -9,15 +10,18 @@ component "Клієнтський додаток (MVC)" as Client {
 
 component "Сервер авторизації" as AuthServer {
     component "Identity Management UI" as IdentityUI
-    component "Authorization Controller" as AuthController
+    component "OIDC endpoints" as OidcEndpoints
     component "Discovery endpoints" as DiscoveryEndpoints
     component "OpenIddict Server Services" as OpenIddictServer
     component "ASP.NET Core Identity Services" as IdentityCore
+    component "Entity Framework Core\n(DbContext + Stores)" as EfCore
 
-    AuthController ..> OpenIddictServer : "Опрацювання запитів"
-    AuthController ..> IdentityCore : "Отримання інформації про користувача"
+    OidcEndpoints ..> OpenIddictServer : "Опрацювання запитів"
+    OidcEndpoints ..> IdentityCore : "Отримання автентифікованого Claims Principal"
     IdentityUI ..> IdentityCore : "Управління ідентичністю користувача"
     DiscoveryEndpoints ..> OpenIddictServer : "Імплементація"
+    OpenIddictServer ..> EfCore : "Запис даних для автентифікації та авторизації"
+    IdentityCore ..> EfCore : "Запис облікових даних користувачів"
 }
 
 component "Сервер ресурсів (API)" as ResourceServer {
@@ -31,19 +35,18 @@ component "Сервер ресурсів (API)" as ResourceServer {
 
 database "SQL Database" as DB
 
-OpenIddictServer ..> DB : "Запис даних для автентифікації та авторизації"
-IdentityCore ..> DB : "Запис облікових даних користувачів"
+EfCore ..> DB : "CRUD операції над даними"
 
 interface "OIDC Protocol endpoints" as OidcInterface
-AuthServer -up- OidcInterface
+OidcInterface -- AuthServer
 Client ..> OidcInterface : "Взаємодія через OIDC / OAuth 2.0"
 
 interface "Discovery (.well-known)" as DiscoveryInterface
-AuthServer -- DiscoveryInterface
+DiscoveryInterface -- AuthServer
 OpenIddictValidation ..> DiscoveryInterface : "Отримання Signing Keys (JWKS)"
 
 interface "REST API\n(Data Access)" as ApiInterface
-ResourceServer -up- ApiInterface
+ApiInterface -- ResourceServer
 Client ..> ApiInterface : "Запит з Access token"
 
 @enduml
