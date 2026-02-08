@@ -1,0 +1,47 @@
+@startuml "Controller Layer Class Diagram"
+title "Діаграма класів шару контролерів"
+
+skinparam linetype ortho
+
+' --- Controllers ---
+class Controller <<framework>>
+
+class AuthorizationController {
+    - _applicationManager: IOpenIddictApplicationManager {readOnly}
+    - _authorizationManager: IOpenIddictAuthorizationManager {readOnly}
+    - _scopeManager: IOpenIddictScopeManager {readOnly}
+    - _signInManager: SignInManager<ApplicationUser> {readOnly}
+    - _userManager: UserManager<ApplicationUser> {readOnly}
+
+    +Authorize(): Task<IActionResult>
+    +Accept(): Task<IActionResult>
+    +Deny(): IActionResult
+    +Logout(): IActionResult
+    +LogoutPost(): Task<IActionResult>
+    +Exchange(): Task<IActionResult>
+    -CreateIdentityWithClaims(ApplicationUser, ClaimsPrincipal?): Task<ClaimsIdentity>
+    -MustForceAuthentication(OpenIddictRequest?, AuthenticateResult?): bool
+}
+Controller <|-- AuthorizationController
+
+class HomeController {
+    +Index(): IActionResult
+    +Error(): IActionResult
+}
+Controller <|-- HomeController
+
+HomeController ..> ErrorViewModel
+AuthorizationController ..> AuthorizeViewModel
+
+' --- Models & ViewModels ---
+class AuthorizeViewModel <<ViewModel>> {
+    +ApplicationName: string?
+    +Scope: string?
+}
+
+class ErrorViewModel <<ViewModel>> {
+    +RequestId: string?
+    +ShowRequestId: bool {readOnly}
+}
+
+@enduml

@@ -1,0 +1,74 @@
+@startuml "Identity UI Layer Class Diagram"
+title "Діаграма класів шару Identity UI"
+
+skinparam linetype ortho
+
+' --- Identity Pages ---
+class PageModel <<framework>>
+
+' --- Login Model ---
+class LoginModel {
+    +Input: LoginInputModel
+    +ErrorMessage: string
+    - _signInManager: SignInManager<ApplicationUser> {readOnly}
+
+    +OnGetAsync(string): Task
+    +OnPostAsync(string): Task<IActionResult>
+}
+
+class LoginInputModel {
+    +Email: string
+    +Password: string
+    +RememberMe: bool
+}
+
+LoginModel +-up- LoginInputModel
+PageModel <|-left- LoginModel
+
+
+' --- Register Model ---
+class RegisterModel {
+    - _signInManager: SignInManager<ApplicationUser>
+    - _userManager: UserManager<ApplicationUser>
+    - _userStore: IUserStore<ApplicationUser>
+    - _emailStore: IUserEmailStore<ApplicationUser>
+    - _emailSender: IEmailSender
+
+    +Input: RegisterInputModel
+    +ReturnUrl: string
+
+    +OnGetAsync(string): Task
+    +OnPostAsync(string): Task<IActionResult>
+    -CreateUser(): ApplicationUser
+}
+
+class RegisterInputModel {
+    +Email: string
+    +Password: string
+    +ConfirmPassword: string
+}
+
+RegisterModel +-left- RegisterInputModel
+PageModel <|-- RegisterModel
+
+' --- Index Model ---
+class IndexModel {
+    - _userManager: UserManager<ApplicationUser> {readOnly}
+    - _signInManager: SignInManager<ApplicationUser> {readOnly}
+
+    +Input: IndexInputModel
+    +Username: string
+    +StatusMessage: string
+    +OnGetAsync(): Task<IActionResult>
+    +OnPostAsync(): Task<IActionResult>
+    -LoadAsync(ApplicationUser): Task
+}
+
+class IndexInputModel {
+    +PhoneNumber: string
+}
+
+IndexModel +-- IndexInputModel
+PageModel <|-right- IndexModel
+
+@enduml

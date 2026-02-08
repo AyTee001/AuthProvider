@@ -1,0 +1,20 @@
+@startuml "Data Layer Class Diagram"
+
+title "Діаграма класів шару доступу до даних"
+
+skinparam linetype ortho
+
+class "IdentityDbContext<TUser>" as IdentityDbContext <<framework>>
+class IdentityUser <<framework>>
+
+class AuthProviderDbContext {
+    + AuthProviderDbContext(DbContextOptions)
+}
+
+class ApplicationUser
+
+IdentityDbContext <|-down- AuthProviderDbContext
+IdentityUser <|-- ApplicationUser
+AuthProviderDbContext "1" -up-> "*" ApplicationUser : manages >
+
+@enduml
