@@ -1,43 +1,39 @@
 @startuml "Class Diagram"
 
-' ----------------------
-' Layout & Style
-' ----------------------
-left to right direction
 skinparam linetype ortho
-' Invisible lines to force groups
-' ----------------------
 
-' --- Data Layer (Identity) ---
+' --- Data Layer ---
 class "IdentityDbContext<TUser>" as IdentityDbContext <<framework>>
 class IdentityUser <<framework>>
 
 class AuthProviderDbContext {
-    +AuthProviderDbContext(options: DbContextOptions)
-    #OnModelCreating(builder: ModelBuilder): void
+    +AuthProviderDbContext(DbContextOptions<AuthProviderDbContext>)
 }
 
 class ApplicationUser
 
 IdentityDbContext <|-- AuthProviderDbContext
 IdentityUser <|-- ApplicationUser
-AuthProviderDbContext "1" --> "1" ApplicationUser : manages >
-
-' Invisible anchors for layout
-IdentityDbContext -[hidden]-> ApplicationUser
+AuthProviderDbContext "1" --> "*" ApplicationUser : manages >
 
 ' --- Controllers ---
 class Controller <<framework>>
 
 class AuthorizationController {
+    - _applicationManager: IOpenIddictApplicationManager {readOnly}
+    - _authorizationManager: IOpenIddictAuthorizationManager {readOnly}
+    - _scopeManager: IOpenIddictScopeManager {readOnly}
+    - _signInManager: SignInManager<ApplicationUser> {readOnly}
+    - _userManager: UserManager<ApplicationUser> {readOnly}
+
     +Authorize(): Task<IActionResult>
     +Accept(): Task<IActionResult>
     +Deny(): IActionResult
     +Logout(): IActionResult
     +LogoutPost(): Task<IActionResult>
     +Exchange(): Task<IActionResult>
-    -CreateIdentityWithClaims(): Task<ClaimsIdentity>
-    -MustForceAuthentication(): bool
+    -CreateIdentityWithClaims(ApplicationUser, ClaimsPrincipal?): Task<ClaimsIdentity>
+    -MustForceAuthentication(OpenIddictRequest?, AuthenticateResult?): bool
 }
 
 class HomeController {
@@ -49,80 +45,85 @@ Controller <|-- AuthorizationController
 Controller <|-- HomeController
 
 HomeController ..> ErrorViewModel
+AuthorizationController ..> AuthorizeViewModel
 
 ' --- Models & ViewModels ---
 class AuthorizeViewModel <<ViewModel>> {
-    +ApplicationName: string
-    +Scope: string
+    +ApplicationName: string?
+    +Scope: string?
 }
 
 class ErrorViewModel <<ViewModel>> {
-    +RequestId: string
+    +RequestId: string?
     +ShowRequestId: bool {readOnly}
 }
-
-' Invisible layout control
-AuthorizeViewModel -[hidden]-> ErrorViewModel
 
 ' --- Identity Pages ---
 class PageModel <<framework>>
 
+' --- Login Model ---
 class LoginModel {
-    +Input: InputModel
-    +OnGetAsync(): Task
-    +OnPostAsync(): Task<IActionResult>
+    +Input: LoginInputModel
+    +ErrorMessage: string
+    - _signInManager: SignInManager<ApplicationUser> {readOnly}
+
+    +OnGetAsync(string): Task
+    +OnPostAsync(string): Task<IActionResult>
 }
 
-class RegisterModel {
-    +Input: InputModel
-    +OnGetAsync(): Task
-    +OnPostAsync(): Task<IActionResult>
-}
-
-class IndexModel {
-    +Input: InputModel
-    +OnGetAsync(): Task<IActionResult>
-}
-
-PageModel <|-- LoginModel
-PageModel <|-- RegisterModel
-PageModel <|-- IndexModel
-
-' --- Nested Input Models ---
-class "LoginModel::InputModel" as LoginInput <<ViewModel>> {
+class LoginInputModel {
     +Email: string
     +Password: string
+    +RememberMe: bool
 }
 
-class "RegisterModel::InputModel" as RegisterInput <<ViewModel>> {
+LoginModel +-- LoginInputModel
+PageModel <|-- LoginModel
+
+
+' --- Register Model ---
+class RegisterModel {
+    - _signInManager: SignInManager<ApplicationUser>
+    - _userManager: UserManager<ApplicationUser>
+    - _userStore: IUserStore<ApplicationUser>
+    - _emailStore: IUserEmailStore<ApplicationUser>
+    - _emailSender: IEmailSender
+
+    +Input: RegisterInputModel
+    +ReturnUrl: string
+
+    +OnGetAsync(string): Task
+    +OnPostAsync(string): Task<IActionResult>
+    -CreateUser(): ApplicationUser
+}
+
+class RegisterInputModel {
     +Email: string
     +Password: string
     +ConfirmPassword: string
 }
 
-LoginModel *-- LoginInput
-RegisterModel *-- RegisterInput
+RegisterModel +-- RegisterInputModel
+PageModel <|-- RegisterModel
 
-' Invisible layout control
-LoginInput -[hidden]-> RegisterInput
+' --- Index Model ---
+class IndexModel {
+    - _userManager: UserManager<ApplicationUser> {readOnly}
+    - _signInManager: SignInManager<ApplicationUser> {readOnly}
 
-' --- Infrastructure / Workers ---
-interface IHostedService <<framework>>
-
-class SeedWorker {
-    +StartAsync(): Task
-    +StopAsync(): Task
+    +Input: IndexInputModel
+    +Username: string
+    +StatusMessage: string
+    +OnGetAsync(): Task<IActionResult>
+    +OnPostAsync(): Task<IActionResult>
+    -LoadAsync(ApplicationUser): Task
 }
 
-IHostedService <|-- SeedWorker
-SeedWorker ..> AuthProviderDbContext
-
-' --- Custom MVC Attributes ---
-class ActionMethodSelectorAttribute <<framework>>
-class FormValueAttribute {
-    +IsValidForRequest(): bool
+class IndexInputModel {
+    +PhoneNumber: string
 }
 
-ActionMethodSelectorAttribute <|-- FormValueAttribute
+IndexModel +-- IndexInputModel
+PageModel <|-- IndexModel
 
 @enduml
