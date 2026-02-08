@@ -1,0 +1,36 @@
+@startuml "Deployment Diagram"
+title "Діаграма розгортання"
+
+skinparam componentStyle uml2
+
+node "Google Cloud Platform (GCP)" as GCP {
+    
+    node "Cloud Run (Serverless)" {
+        node "Client App" as CloudRunClient <<service>>{
+            component "Client Container\n(MVC app)" as ClientInstance
+        }
+        
+        node "Auth Server" as CloudRunAuth <<service>>{
+            component "Auth Server Container\n(OpenIddict)" as AuthInstance
+        }
+        
+        node "Resource API" as CloudRunApi <<service>> {
+            component "API Container\n(Resource Server)" as ApiInstance
+        }
+    }
+
+    database "Cloud SQL\n(SQL Server)" as CloudSQL
+}
+
+node "End User" as UserNode {
+    agent "Web Browser" as Browser
+}
+
+Browser --> ClientInstance : "HTTPS"
+ClientInstance --> AuthInstance : "OIDC Auth (HTTPS)"
+ClientInstance --> ApiInstance : "API Calls (HTTPS)"
+
+AuthInstance --> CloudSQL : "SQL Connection\n(EF Core)"
+ApiInstance --> CloudRunAuth : "Key Retrieval (JWKS)\n(HTTPS)"
+
+@enduml
