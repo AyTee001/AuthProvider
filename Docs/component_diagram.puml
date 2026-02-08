@@ -2,26 +2,32 @@
 title Діаграма компонентів системи автентифікації/авторизації
 
 skinparam componentStyle uml2
-skinparam linetype ortho
 
+' --- Клієнт ---
 component "Клієнтський додаток (MVC)" as Client {
     component "OpenIddict Client Services" as OpenIddictClient
 }
 
+' --- Інтерфейси ---
+together {
+    interface "OIDC Protocol endpoints" as OidcInterface
+    interface "Discovery (.well-known)" as DiscoveryInterface
+    interface "REST API\n(Data Access)" as ApiInterface
+}
+
+' --- Auth Server ---
 component "Сервер авторизації" as AuthServer {
     component "Identity Management UI" as IdentityUI
     component "OIDC endpoints" as OidcEndpoints
-    component "Discovery endpoints" as DiscoveryEndpoints
     component "OpenIddict Server Services" as OpenIddictServer
     component "ASP.NET Core Identity Services" as IdentityCore
     component "Entity Framework Core\n(DbContext + Stores)" as EfCore
 
-    OidcEndpoints ..> OpenIddictServer : "Опрацювання запитів"
-    OidcEndpoints ..> IdentityCore : "Отримання автентифікованого Claims Principal"
-    IdentityUI ..> IdentityCore : "Управління ідентичністю користувача"
-    DiscoveryEndpoints ..> OpenIddictServer : "Імплементація"
-    OpenIddictServer ..> EfCore : "Запис даних для автентифікації та авторизації"
-    IdentityCore ..> EfCore : "Запис облікових даних користувачів"
+    OidcEndpoints ..> OpenIddictServer : "Опрацювання\nзапитів"
+    OidcEndpoints ..> IdentityCore : "Отримання\nавтентифікованого\nClaims Principal"
+    IdentityUI ..> IdentityCore : "Управління\nідентичністю користувача"
+    OpenIddictServer ..> EfCore : "Запис даних для\nавтентифікації та авторизації"
+    IdentityCore ..> EfCore : "Запис облікових\nданих користувачів"
 }
 
 component "Сервер ресурсів (API)" as ResourceServer {
@@ -33,20 +39,19 @@ component "Сервер ресурсів (API)" as ResourceServer {
     ResourceControllers ..> RequestMiddleware : "Захищається"
 }
 
+' --- БД ---
 database "SQL Database" as DB
 
-EfCore ..> DB : "CRUD операції над даними"
+' --- Зовнішні зв'язки ---
+Client --> OidcInterface : "OIDC / OAuth 2.0"
+Client --> ApiInterface : "Запит з Access token"
 
-interface "OIDC Protocol endpoints" as OidcInterface
-OidcInterface -- AuthServer
-Client ..> OidcInterface : "Взаємодія через OIDC / OAuth 2.0"
+OidcInterface -- OidcEndpoints
+DiscoveryInterface -- OpenIddictServer
+ApiInterface -- ResourceControllers
 
-interface "Discovery (.well-known)" as DiscoveryInterface
-DiscoveryInterface -- AuthServer
-OpenIddictValidation ..> DiscoveryInterface : "Отримання Signing Keys (JWKS)"
+OpenIddictValidation --> DiscoveryInterface : "Signing Keys (JWKS)"
 
-interface "REST API\n(Data Access)" as ApiInterface
-ApiInterface -- ResourceServer
-Client ..> ApiInterface : "Запит з Access token"
+EfCore ..left..> DB : "CRUD операції"
 
 @enduml
