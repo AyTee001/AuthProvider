@@ -7,14 +7,16 @@ class "IdentityDbContext<TUser>" as IdentityDbContext <<framework>>
 class IdentityUser <<framework>>
 
 class AuthProviderDbContext {
-    +AuthProviderDbContext(DbContextOptions<AuthProviderDbContext>)
+    + AuthProviderDbContext(DbContextOptions)
 }
 
 class ApplicationUser
 
-IdentityDbContext <|-- AuthProviderDbContext
-IdentityUser <|-- ApplicationUser
-AuthProviderDbContext "1" --> "*" ApplicationUser : manages >
+IdentityDbContext <|-down- AuthProviderDbContext
+IdentityUser <|-left- ApplicationUser
+AuthProviderDbContext "1" -up-> "*" ApplicationUser : manages >
+
+IdentityDbContext -[hidden]- AuthorizationController
 
 ' --- Controllers ---
 class Controller <<framework>>
@@ -35,13 +37,12 @@ class AuthorizationController {
     -CreateIdentityWithClaims(ApplicationUser, ClaimsPrincipal?): Task<ClaimsIdentity>
     -MustForceAuthentication(OpenIddictRequest?, AuthenticateResult?): bool
 }
+Controller <|-- AuthorizationController
 
 class HomeController {
     +Index(): IActionResult
     +Error(): IActionResult
 }
-
-Controller <|-- AuthorizationController
 Controller <|-- HomeController
 
 HomeController ..> ErrorViewModel
@@ -57,6 +58,8 @@ class ErrorViewModel <<ViewModel>> {
     +RequestId: string?
     +ShowRequestId: bool {readOnly}
 }
+
+AuthorizeViewModel -[hidden]- PageModel
 
 ' --- Identity Pages ---
 class PageModel <<framework>>
@@ -77,8 +80,8 @@ class LoginInputModel {
     +RememberMe: bool
 }
 
-LoginModel +-- LoginInputModel
-PageModel <|-- LoginModel
+LoginModel +-up- LoginInputModel
+PageModel <|-left- LoginModel
 
 
 ' --- Register Model ---
@@ -103,7 +106,7 @@ class RegisterInputModel {
     +ConfirmPassword: string
 }
 
-RegisterModel +-- RegisterInputModel
+RegisterModel +-left- RegisterInputModel
 PageModel <|-- RegisterModel
 
 ' --- Index Model ---
@@ -124,6 +127,6 @@ class IndexInputModel {
 }
 
 IndexModel +-- IndexInputModel
-PageModel <|-- IndexModel
+PageModel <|-right- IndexModel
 
 @enduml
