@@ -3,6 +3,7 @@
 title "Діаграма класів шару доступу до даних"
 
 skinparam linetype ortho
+skinparam classAttributeIconSize 0
 
 class "IdentityDbContext<TUser>" as IdentityDbContext <<framework>>
 class IdentityUser <<framework>>

@@ -2,6 +2,7 @@
 title "Діаграма класів шару Identity UI"
 
 skinparam linetype ortho
+skinparam classAttributeIconSize 0
 
 ' --- Identity Pages ---
 class PageModel <<framework>>

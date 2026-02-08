@@ -2,6 +2,7 @@
 title "Діаграма класів шару контролерів"
 
 skinparam linetype ortho
+skinparam classAttributeIconSize 0
 
 ' --- Controllers ---
 class Controller <<framework>>
