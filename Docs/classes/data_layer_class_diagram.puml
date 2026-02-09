@@ -5,7 +5,7 @@ title "Діаграма класів шару доступу до даних"
 skinparam linetype ortho
 skinparam classAttributeIconSize 0
 
-class "IdentityDbContext<TUser>" as IdentityDbContext <<framework>>
+class "IdentityDbContext<ApplicationUser>" as IdentityDbContext <<framework>>
 class IdentityUser <<framework>>
 
 class AuthProviderDbContext {
@@ -16,6 +16,6 @@ class ApplicationUser
 
 IdentityDbContext <|-down- AuthProviderDbContext
 IdentityUser <|-- ApplicationUser
-AuthProviderDbContext "1" -up-> "*" ApplicationUser : manages >
+AuthProviderDbContext "1" -up-> "*" ApplicationUser : зберігання >
 
 @enduml

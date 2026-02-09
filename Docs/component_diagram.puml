@@ -43,8 +43,8 @@ component "Сервер ресурсів (API)" as ResourceServer {
 database "SQL Database" as DB
 
 ' --- Зовнішні зв'язки ---
-Client --> OidcInterface : "OIDC / OAuth 2.0"
-Client --> ApiInterface : "Запит з Access token"
+Client --> OidcInterface : "OIDC /\nOAuth 2.0"
+Client --> ApiInterface : "Запит з\nAccess token"
 
 OidcInterface -- OidcEndpoints
 DiscoveryInterface -- OpenIddictServer
