@@ -2,16 +2,17 @@
 title "OpenID Connect Authorization Code Flow для клієнт-серверного додатку"
 
 actor "Користувач" as User
-participant "Користувацький\nагент (з PWA, SPA тощо)" as UserAgent
-participant "Клієнт\n(серверна частина)" as Client
-participant "Сервер авторизації\n(Authorization server / OP)" as OP
+participant "Користувацький\nагент" as UserAgent
+participant "Клієнт" as Client
+participant "Сервер авторизації" as OP
 
 autonumber
 
-== 1. Ініціація процесу автентифікації ==
+== 1. Ініціація та підготовка запиту ==
 User -> UserAgent: Ініціює логін
 UserAgent -> Client: Запит на логін
-Client -> OP: Запит автентифікації\nна /connect/authorize
+Client -> Client: Генерація code_verifier\nта code_challenge
+Client -> OP: Запит на /connect/authorize\nз code_challenge
 activate OP
 OP --> UserAgent: Редирект на сторінку\nавтентифікації (302)
 deactivate OP
@@ -27,16 +28,25 @@ OP -> UserAgent: Встановлення session cookie,\n редирект н�
 deactivate OP
 
 == 3. Отримання коду авторизації ==
-UserAgent -> OP: Слідування редиркту, \nз переходом на /connect/authorize (with cookie)
+UserAgent -> OP: Слідування редиректу, \nз переходом на /connect/authorize (with cookie)
 activate OP
 OP -> OP: Перевірка сесії\nавтентифікації
-OP --> Client: Редирект на клієнт\nз кодом авторизації (302)
+
+opt Потреба в отриманні явної згоди (Consent)
+    OP --> UserAgent: Запит на надання дозволів (Scopes)
+    UserAgent --> User: Показ вікна згоди
+    User -> UserAgent: Підтвердження згоди
+    UserAgent -> OP: Надсилання підтвердження
+end
+
+OP --> UserAgent: Редирект на клієнт\nз кодом авторизації (302)
 deactivate OP
+UserAgent --> Client: Передача коду\nавторизації\nза Redirect URI
 
 == 4. Обмін коду на токени ==
-Client -> OP: Запит на токен до /connect/token\nз кодом авторизації
+Client -> OP: Запит на токен до /connect/token\nз кодом авторизації\nта code_verifier
 activate OP
-OP -> OP: Валідація коду,\nгенерація токенів
+OP -> OP: Валідація коду,\ncode_verifier та code_challenge,\nгенерація токенів
 OP --> Client: access_token + id_token\n+ refresh_token
 deactivate OP
 
