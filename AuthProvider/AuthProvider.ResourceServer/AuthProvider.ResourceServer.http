@@ -1,0 +1,6 @@
+@AuthProvider.ResourceServer_HostAddress = http://localhost:5030
+
+GET {{AuthProvider.ResourceServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
