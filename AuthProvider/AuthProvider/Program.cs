@@ -2,6 +2,7 @@ using AuthProvider.Data;
 using AuthProvider.Entities;
 using AuthProvider.Workers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Quartz;
@@ -73,6 +74,7 @@ namespace AuthProvider
                 });
 
             builder.Services.AddHostedService<SeedWorker>();
+            builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
 
             var app = builder.Build();
 

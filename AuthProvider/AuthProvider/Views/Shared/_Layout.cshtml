@@ -25,9 +25,7 @@
                 @if (User.Identity?.IsAuthenticated ?? false)
                 {
                     <a asp-area="Identity" asp-page="/Account/Manage/Index" class="text-gray-600 hover:text-indigo-600 transition">Profile</a>
-                    <form class="inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
-                        <button type="submit" class="text-gray-500 hover:text-red-600 transition">Sign out</button>
-                    </form>
+                    <a asp-area="Identity" asp-page="/Account/Logout" class="text-gray-500 hover:text-red-600 transition">Sign out</a>
                 }
                 else
                 {

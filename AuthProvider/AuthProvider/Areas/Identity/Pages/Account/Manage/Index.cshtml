@@ -2,26 +2,57 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Profile";
-    ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h3>@ViewData["Title"]</h3>
-<partial name="_StatusMessage" for="StatusMessage" />
-<div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
-                <label asp-for="Username" class="form-label"></label>
+<div class="flex-1 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-4 shadow-xl border border-gray-100 sm:rounded-xl sm:px-10">
+
+            <div class="mb-8 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 mb-4">
+                    <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Your Profile</h2>
+                <p class="mt-1 text-sm text-gray-500">Manage your account details</p>
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
-                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-            </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
-        </form>
+
+            @* Replacing the bootstrap alert with a Tailwind-friendly status *@
+            @if (!string.IsNullOrEmpty(Model.StatusMessage))
+            {
+                var isError = Model.StatusMessage.StartsWith("Error");
+                <div class="@(isError ? "bg-red-50 text-red-700 border-red-200" : "bg-green-50 text-green-700 border-green-200") p-4 mb-6 rounded-md border text-sm" role="alert">
+                    @Model.StatusMessage
+                </div>
+            }
+
+            <form id="profile-form" method="post" class="space-y-6">
+                <div asp-validation-summary="ModelOnly" class="p-3 rounded-md bg-red-50 text-sm text-red-700" role="alert"></div>
+
+                <div>
+                    <label asp-for="Username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <div class="mt-1">
+                        <input asp-for="Username" class="block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-500 sm:text-sm cursor-not-allowed shadow-sm" disabled />
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="Input.PhoneNumber" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <div class="mt-1">
+                        <input asp-for="Input.PhoneNumber" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your phone number" />
+                    </div>
+                    <span asp-validation-for="Input.PhoneNumber" class="text-xs text-red-600 mt-1"></span>
+                </div>
+
+                <div>
+                    <button id="update-profile-button" type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors shadow-sm">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+
+        </div>
     </div>
 </div>
 
