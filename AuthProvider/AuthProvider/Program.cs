@@ -73,6 +73,12 @@ namespace AuthProvider
                     opt.UseAspNetCore();
                 });
 
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login";
+                options.LogoutPath = "/Identity/Account/Logout";
+            });
+
             builder.Services.AddHostedService<SeedWorker>();
             builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
 

@@ -25,8 +25,8 @@ namespace AuthProvider.Workers
                     ClientSecret = "901564A5-E7FE-42CB-B10D-61EF6A8F3654",
                     ConsentType = ConsentTypes.Explicit,
                     DisplayName = "MVC client application",
-                    RedirectUris = { new Uri("https://localhost:44338/callback/login/local") },
-                    PostLogoutRedirectUris = { new Uri("https://localhost:44338/callback/logout/local") },
+                    RedirectUris = { new Uri("callback/login/local", UriKind.Relative) },
+                    PostLogoutRedirectUris = { new Uri("callback/logout/local", UriKind.Relative) },
                     Permissions = {
                         Permissions.Endpoints.Authorization,
                         Permissions.Endpoints.EndSession,
