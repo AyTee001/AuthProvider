@@ -120,13 +120,8 @@ public class AuthorizationController(
                     }));
 
             default:
-                return View(new AuthorizeViewModel
-                {
-                    ApplicationName = (await _applicationManager.GetLocalizedDisplayNameAsync(application))!,
-                    Scope = authRequest.Scope
-                });
+                return View(new AuthorizeViewModel(await _applicationManager.GetLocalizedDisplayNameAsync(application), authRequest.Scope));
         }
-
     }
 
     [Authorize, FormValue("submit.Accept")]

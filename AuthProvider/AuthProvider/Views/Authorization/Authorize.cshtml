@@ -22,9 +22,9 @@
             </div>
 
             <div class="space-y-3 mb-8">
-                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">The application wants to access these scopes:</p>
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">The application wants to:</p>
                 <div class="space-y-2">
-                    @foreach (var scope in (Model.Scope ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                    @foreach (var scope in (Model.ScopeDisplayInfos ?? []))
                     {
                         <div class="flex items-center space-x-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
