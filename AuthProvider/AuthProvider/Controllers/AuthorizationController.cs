@@ -187,7 +187,7 @@ public class AuthorizationController(
 
 
     [HttpGet("~/connect/logout")]
-    public IActionResult Logout() => View();
+    public IActionResult Logout() => RedirectToPage("/Account/Logout", new { area = "Identity" });
 
 
     [ActionName(nameof(Logout)), HttpPost("~/connect/logout"), ValidateAntiForgeryToken]

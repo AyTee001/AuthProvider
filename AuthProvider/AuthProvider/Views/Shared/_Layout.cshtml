@@ -11,33 +11,34 @@
     @RenderSection("Styles", required: false)
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col text-gray-900">
+    @if (ViewData["HideNavLinks"] == null)
+    {
+        <header class="bg-white border-b border-gray-200 shadow-sm">
+            <nav class="container mx-auto flex justify-between items-center px-6 py-4">
+                <a asp-area="" asp-controller="Home" asp-action="Index"
+                   class="text-xl font-bold text-indigo-600 hover:text-indigo-700 transition">
+                    AuthProvider
+                </a>
 
-    <header class="bg-white border-b border-gray-200 shadow-sm">
-        <nav class="container mx-auto flex justify-between items-center px-6 py-4">
-            <a asp-area="" asp-controller="Home" asp-action="Index"
-               class="text-xl font-bold text-indigo-600 hover:text-indigo-700 transition">
-                AuthProvider
-            </a>
+                <div class="flex gap-6 items-center text-sm font-medium">
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="text-gray-600 hover:text-indigo-600 transition">Home</a>
 
-            <div class="flex gap-6 items-center text-sm font-medium">
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="text-gray-600 hover:text-indigo-600 transition">Home</a>
-
-                @if (User.Identity?.IsAuthenticated ?? false)
-                {
-                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="text-gray-600 hover:text-indigo-600 transition">Profile</a>
-                    <a asp-area="Identity" asp-page="/Account/Logout" class="text-gray-500 hover:text-red-600 transition">Sign out</a>
-                }
-                else
-                {
-                    <a asp-area="Identity" asp-page="/Account/Login"
-                       class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
-                        Sign in
-                    </a>
-                }
-            </div>
-        </nav>
-    </header>
-
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="text-gray-600 hover:text-indigo-600 transition">Profile</a>
+                        <a asp-area="Identity" asp-page="/Account/Logout" class="text-gray-500 hover:text-red-600 transition">Sign out</a>
+                    }
+                    else
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Login"
+                           class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                            Sign in
+                        </a>
+                    }
+                </div>
+            </nav>
+        </header>
+    }
     <main class="flex-1 flex flex-col bg-iam-circuit">
         @RenderBody()
     </main>
