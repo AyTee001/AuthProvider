@@ -52,7 +52,7 @@ namespace AuthProvider
                        .SetTokenEndpointUris("connect/token")
                        .SetUserInfoEndpointUris("connect/userinfo");
 
-                    opt.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles);
+                    opt.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles, Scopes.OfflineAccess);
 
                     opt.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
                     opt.AllowRefreshTokenFlow();
