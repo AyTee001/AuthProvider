@@ -181,23 +181,6 @@ public class AuthorizationController(
     public IActionResult Deny() => Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
 
-    [HttpGet("~/connect/logout")]
-    public IActionResult Logout() => RedirectToPage("/Account/Logout", new { area = "Identity" });
-
-
-    [ActionName(nameof(Logout)), HttpPost("~/connect/logout"), ValidateAntiForgeryToken]
-    public async Task<IActionResult> LogoutPost()
-    {
-        await _signInManager.SignOutAsync();
-
-        return SignOut(
-            authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
-            properties: new AuthenticationProperties
-            {
-                RedirectUri = "/"
-            });
-    }
-
     [HttpPost("~/connect/token"), IgnoreAntiforgeryToken, Produces("application/json")]
     public async Task<IActionResult> Exchange()
     {

@@ -58,7 +58,7 @@ namespace AuthProvider
                     opt.AllowRefreshTokenFlow();
 
                     opt.AddDevelopmentEncryptionCertificate()
-                        .AddDevelopmentSigningCertificate();
+                       .AddDevelopmentSigningCertificate();
 
                     opt.UseAspNetCore()
                         .EnableAuthorizationEndpointPassthrough()

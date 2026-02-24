@@ -1,5 +1,6 @@
-﻿@page
+﻿@page "/connect/logout"
 @model LogoutModel
+@using Microsoft.Extensions.Primitives
 @{
     ViewData["Title"] = "Log out";
 }
@@ -22,7 +23,12 @@
                     </p>
                 </div>
 
-                <form class="inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                <form class="inline" method="post">
+                    <input type="hidden" name="client_id" value="@Model.ClientId" />
+                    <input type="hidden" name="post_logout_redirect_uri" value="@Model.PostLogoutRedirectUri" />
+                    <input type="hidden" name="id_token_hint" value="@Model.IdTokenHint" />
+                    <input type="hidden" name="state" value="@Model.State" />
+
                     <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                         Confirm Log out
                     </button>
@@ -34,7 +40,7 @@
                     </a>
                 </div>
             }
-            else
+           else
             {
                 <div class="mb-6">
                     <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">

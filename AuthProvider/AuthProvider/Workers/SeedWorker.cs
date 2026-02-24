@@ -1,6 +1,7 @@
 ﻿using AuthProvider.Data;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using static System.Net.WebRequestMethods;
 
 namespace AuthProvider.Workers
 {
@@ -17,27 +18,29 @@ namespace AuthProvider.Workers
 
             var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
-            if (await manager.FindByClientIdAsync("mvc", cancellationToken) == null)
+            if (await manager.FindByClientIdAsync("mvc-client", cancellationToken) == null)
             {
                 await manager.CreateAsync(new OpenIddictApplicationDescriptor
                 {
-                    ClientId = "mvc",
-                    ClientSecret = "901564A5-E7FE-42CB-B10D-61EF6A8F3654",
+                    ClientId = "mvc-client",
+                    ClientSecret = "65bd1ee0-8d7c-4600-bb01-10f633ac1c8d",
                     ConsentType = ConsentTypes.Explicit,
-                    DisplayName = "MVC client application",
-                    RedirectUris = { new Uri("https://localhost:44338/callback/login/local") },
-                    PostLogoutRedirectUris = { new Uri("https://localhost:44338/callback/logout/local") },
+                    DisplayName = "MVC Client Application",
+                    RedirectUris = { new Uri("https://localhost:7197/callback/login/local") },
+                    PostLogoutRedirectUris = { new Uri("https://localhost:7197/callback/logout/local") },
                     Permissions = {
-                        Permissions.Endpoints.Authorization,
+                        Permissions.Endpoints.Authorization, 
                         Permissions.Endpoints.EndSession,
                         Permissions.Endpoints.Token,
+
                         Permissions.GrantTypes.AuthorizationCode,
+                        Permissions.GrantTypes.RefreshToken,
+
                         Permissions.ResponseTypes.Code,
+
                         Permissions.Scopes.Email,
                         Permissions.Scopes.Profile,
                         Permissions.Scopes.Roles,   
-                        Permissions.GrantTypes.RefreshToken,
-                        Permissions.Prefixes.Scope + Scopes.OfflineAccess
                     },
                     Requirements = { Requirements.Features.ProofKeyForCodeExchange }
                 }, cancellationToken);

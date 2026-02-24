@@ -1,8 +1,58 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-section text-center">
+    <h1 class="display-4 fw-bold">MVC Client</h1>
+    <p class="lead text-muted">A secure OpenID Connect integration for my Bachelor's Thesis.</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h5 class="mb-4">Session Status</h5>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="alert alert-success d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <strong>Connected:</strong> You are currently logged in via the Auth Server.
+                    </div>
+                    <span class="badge bg-success">Authenticated</span>
+                </div>
+
+                <div class="mt-4">
+                    <h6>Identity Claims</h6>
+                    <table class="table table-sm mt-2">
+                        <thead>
+                            <tr class="text-muted">
+                                <th>Claim Type</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var claim in User.Claims)
+                            {
+                                <tr>
+                                    <td><code class="small">@claim.Type.Split('/').Last()</code></td>
+                                    <td>@claim.Value</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <strong>Anonymous:</strong> Please log in to access protected resources and view your tokens.
+                </div>
+                <div class="text-center mt-3">
+                    <a class="btn btn-primary px-5 py-2" asp-controller="Authentication" asp-action="LogIn">
+                        Sign in with AuthProvider server
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
 </div>
