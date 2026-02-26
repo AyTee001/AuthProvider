@@ -1,20 +1,17 @@
+using AuthProvider.Client.Http;
 using AuthProvider.Client.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace AuthProvider.Client.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController(ResourceServerService service) : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ResourceServerService _service = service;
 
-        public HomeController(ILogger<HomeController> logger)
+        public IActionResult Index(string? joke = null)
         {
-            _logger = logger;
-        }
-
-        public IActionResult Index()
-        {
+            ViewData["Joke"] = joke;
             return View();
         }
 
@@ -27,6 +24,21 @@ namespace AuthProvider.Client.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> FetchJoke()
+        {
+            try
+            {
+                var joke = await _service.GetRandomJoke();
+                return RedirectToAction("Index", new { joke });
+            }
+            catch
+            {
+                return RedirectToAction("Index", new { joke = "Could not reach the resource server!" });
+            }
         }
     }
 }

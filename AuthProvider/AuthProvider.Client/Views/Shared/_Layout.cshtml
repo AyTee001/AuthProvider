@@ -38,7 +38,9 @@
                     {
                         <span class="me-3 text-muted">Hi, @User.Identity.Name</span>
                         <form asp-controller="Authentication" asp-action="LogOut" method="post">
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Log Out</button>
+                            <button type="submit" class="btn btn-outline-danger shadow-sm">
+                                <i class="bi bi-shield-lock"></i> Logout (& revoke tokens)
+                            </button>
                         </form>
                     }
                     else

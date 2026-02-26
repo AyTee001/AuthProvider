@@ -1,14 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
+using OpenIddict.Client;
 using OpenIddict.Client.AspNetCore;
 using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace AuthProvider.Client.Controllers
 {
-    public class AuthenticationController : Controller
+    public class AuthenticationController(OpenIddictClientService clientService) : Controller
     {
+        private readonly OpenIddictClientService _clientService = clientService;
+
         [HttpGet("~/login")]
         public ActionResult LogIn(string returnUrl)
         {
@@ -27,6 +30,21 @@ namespace AuthProvider.Client.Controllers
             {
                 return Redirect(GetLocalUrlOrBase(returnUrl));
             }
+
+            // We only revoke the refresh token, which is not stateless, like access token
+            var refreshToken = await HttpContext.GetTokenAsync("refresh_token");
+
+            if(refreshToken is not null)
+            {
+                var revocationRequest = new OpenIddictClientModels.RevocationRequest()
+                {
+                    Token = refreshToken,
+                    TokenTypeHint = "refresh_token"
+                };
+                await _clientService.RevokeTokenAsync(revocationRequest);
+            }
+
+            await HttpContext.SignOutAsync();
 
             var authPropsDictionary = new Dictionary<string, string?>
             {
@@ -84,9 +102,6 @@ namespace AuthProvider.Client.Controllers
         {
             //Read properties set in the process of logging out to determine where to redirect the user after the process is finished
             var result = await HttpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
-
-            //Sign out here in case user changes their mind while on the Auth Server side
-            await HttpContext.SignOutAsync();
 
             return Redirect(result?.Properties?.RedirectUri ?? "/");
         }

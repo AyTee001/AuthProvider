@@ -32,6 +32,7 @@ namespace AuthProvider.Workers
                         Permissions.Endpoints.Authorization, 
                         Permissions.Endpoints.EndSession,
                         Permissions.Endpoints.Token,
+                        Permissions.Endpoints.Revocation,
 
                         Permissions.GrantTypes.AuthorizationCode,
                         Permissions.GrantTypes.RefreshToken,

@@ -68,10 +68,15 @@ namespace AuthProvider.Client
 
             builder.Services.AddHttpClient<ResourceServerService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:5080/");
+                client.BaseAddress = new Uri("https://localhost:7240/");
             }).AddHttpMessageHandler<AuthDelegatingHandler>();
 
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddRouting(options =>
+            {
+                options.LowercaseUrls = true;
+            });
 
             var app = builder.Build();
 

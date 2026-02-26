@@ -4,7 +4,7 @@ using AuthProvider.Workers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Quartz;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace AuthProvider
@@ -50,15 +50,17 @@ namespace AuthProvider
                     opt.SetAuthorizationEndpointUris("connect/authorize")
                        .SetEndSessionEndpointUris("connect/logout")
                        .SetTokenEndpointUris("connect/token")
-                       .SetUserInfoEndpointUris("connect/userinfo");
+                       .SetUserInfoEndpointUris("connect/userinfo")
+                       .SetRevocationEndpointUris("connect/revocation");
 
                     opt.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles, Scopes.OfflineAccess);
 
                     opt.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
                     opt.AllowRefreshTokenFlow();
 
-                    opt.AddDevelopmentEncryptionCertificate()
-                       .AddDevelopmentSigningCertificate();
+                    opt.AddEncryptionKey(new SymmetricSecurityKey(
+                        Convert.FromBase64String("DRjd/GnduI3Efzen9V9BvbNUfc/VKgXltV7Kbk9sMkY=")));
+                    opt.AddDevelopmentSigningCertificate();
 
                     opt.UseAspNetCore()
                         .EnableAuthorizationEndpointPassthrough()
