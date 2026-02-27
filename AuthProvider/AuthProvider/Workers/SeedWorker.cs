@@ -1,12 +1,12 @@
 ﻿using AuthProvider.Data;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
-using static System.Net.WebRequestMethods;
 
 namespace AuthProvider.Workers
 {
-    public class SeedWorker(IServiceProvider serviceProvider) : IHostedService
+    public class SeedWorker(IServiceProvider serviceProvider, IConfiguration configuration) : IHostedService
     {
+        private readonly IConfiguration _configuration = configuration;
         private readonly IServiceProvider _serviceProvider = serviceProvider;
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -18,16 +18,26 @@ namespace AuthProvider.Workers
 
             var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
-            if (await manager.FindByClientIdAsync("mvc-client", cancellationToken) == null)
+            var clientId = _configuration["OpenIddictServer:Clients:MvcClient:ClientId"];
+            var redirectUri = _configuration["OpenIddictServer:Clients:MvcClient:RedirectUri"];
+            var postLogoutRedirectUri = _configuration["OpenIddictServer:Clients:MvcClient:PostLogoutRedirectUri"];
+            var clientSecret = _configuration["OpenIddictServer:Clients:MvcClient:ClientSecret"];
+
+            if(clientId is null || redirectUri is null || postLogoutRedirectUri is null || clientSecret is null)
+            {
+                throw new ArgumentNullException("Client id, redirect uri and post logout redirect uri must be provided");
+            }
+
+            if (await manager.FindByClientIdAsync(clientId, cancellationToken) == null)
             {
                 await manager.CreateAsync(new OpenIddictApplicationDescriptor
                 {
-                    ClientId = "mvc-client",
-                    ClientSecret = "65bd1ee0-8d7c-4600-bb01-10f633ac1c8d",
+                    ClientId = clientId,
+                    ClientSecret = clientSecret,
                     ConsentType = ConsentTypes.Explicit,
                     DisplayName = "MVC Client Application",
-                    RedirectUris = { new Uri("https://localhost:7197/callback/login/local") },
-                    PostLogoutRedirectUris = { new Uri("https://localhost:7197/callback/logout/local") },
+                    RedirectUris = { new Uri(redirectUri) },
+                    PostLogoutRedirectUris = { new Uri(postLogoutRedirectUri) },
                     Permissions = {
                         Permissions.Endpoints.Authorization, 
                         Permissions.Endpoints.EndSession,

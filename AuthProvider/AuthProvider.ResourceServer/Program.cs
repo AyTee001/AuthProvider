@@ -8,6 +8,9 @@ namespace AuthProvider.ResourceServer
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var authorityUri = builder.Configuration.GetRequiredSection("OpenIddictValidation").GetValue<string>("Authority")
+                ?? throw new ArgumentNullException("Auth server uri must be provided!");
+
             builder.Services.AddOpenIddict()
             .AddValidation(options =>
             {

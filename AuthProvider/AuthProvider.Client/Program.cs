@@ -32,6 +32,17 @@ namespace AuthProvider.Client
                     options.SlidingExpiration = true;
                 });
 
+            //TODO: turn into options objects
+            var authorityUri = builder.Configuration.GetRequiredSection("OpenIddictClient").GetValue<string>("Authority")
+                ?? throw new ArgumentNullException("Auth server uri must be provided!");
+            var clientId = builder.Configuration.GetRequiredSection("OpenIddictClient").GetValue<string>("ClientId")
+                ?? throw new ArgumentNullException("Client id must be provided!");
+            var clientSecret = builder.Configuration.GetRequiredSection("OpenIddictClient").GetValue<string>("ClientSecret")
+                ?? throw new ArgumentNullException("Client secret must be provided!");
+
+            var baseResourceServerUri = builder.Configuration.GetRequiredSection("ResourceServer").GetValue<string>("BaseUri")
+                ?? throw new ArgumentNullException("The base uri of the resource server must be provided!");
+
             builder.Services.AddOpenIddict()
                 .AddCore(options =>
                 {
@@ -55,10 +66,10 @@ namespace AuthProvider.Client
 
                     opt.AddRegistration(new OpenIddictClientRegistration
                     {
-                        Issuer = new Uri("https://localhost:7082/"),
+                        Issuer = new Uri(authorityUri),
 
-                        ClientId = "mvc-client",
-                        ClientSecret = "65bd1ee0-8d7c-4600-bb01-10f633ac1c8d",
+                        ClientId = clientId,
+                        ClientSecret = clientSecret,
                         Scopes = { Scopes.Email, Scopes.Profile, Scopes.OfflineAccess },
                         RedirectUri = new Uri("callback/login/local", UriKind.Relative),
                         PostLogoutRedirectUri = new Uri("callback/logout/local", UriKind.Relative)
@@ -68,7 +79,7 @@ namespace AuthProvider.Client
 
             builder.Services.AddHttpClient<ResourceServerService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7240/");
+                client.BaseAddress = new Uri(baseResourceServerUri);
             }).AddHttpMessageHandler<AuthDelegatingHandler>();
 
             builder.Services.AddControllersWithViews();

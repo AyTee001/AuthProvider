@@ -53,6 +53,8 @@ namespace AuthProvider
                        .SetUserInfoEndpointUris("connect/userinfo")
                        .SetRevocationEndpointUris("connect/revocation");
 
+                    opt.SetRefreshTokenLifetime(TimeSpan.FromMinutes(10));
+
                     opt.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles, Scopes.OfflineAccess);
 
                     opt.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
