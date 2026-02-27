@@ -56,13 +56,23 @@ namespace AuthProvider.Client
                     opt.AddDevelopmentEncryptionCertificate()
                        .AddDevelopmentSigningCertificate();
 
-                    opt.UseAspNetCore()
-                       .EnableStatusCodePagesIntegration()
-                       .EnableRedirectionEndpointPassthrough()
-                       .EnablePostLogoutRedirectionEndpointPassthrough();
+                    if (builder.Environment.IsDevelopment())
+                    {
+                        opt.UseAspNetCore().DisableTransportSecurityRequirement()
+                           .EnableStatusCodePagesIntegration()
+                           .EnableRedirectionEndpointPassthrough()
+                           .EnablePostLogoutRedirectionEndpointPassthrough();
+                    }
+                    else
+                    {
+                        opt.UseAspNetCore()
+                           .EnableStatusCodePagesIntegration()
+                           .EnableRedirectionEndpointPassthrough()
+                           .EnablePostLogoutRedirectionEndpointPassthrough();
+                    }
 
                     opt.UseSystemNetHttp()
-                       .SetProductInformation(typeof(Program).Assembly);
+                           .SetProductInformation(typeof(Program).Assembly);
 
                     opt.AddRegistration(new OpenIddictClientRegistration
                     {

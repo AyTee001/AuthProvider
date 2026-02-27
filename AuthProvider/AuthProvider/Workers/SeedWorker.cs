@@ -1,4 +1,5 @@
 ﻿using AuthProvider.Data;
+using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -14,7 +15,7 @@ namespace AuthProvider.Workers
             await using var scope = _serviceProvider.CreateAsyncScope();
 
             var context = scope.ServiceProvider.GetRequiredService<AuthProviderDbContext>();
-            await context.Database.EnsureCreatedAsync(cancellationToken);
+            await context.Database.MigrateAsync(cancellationToken);
 
             var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 

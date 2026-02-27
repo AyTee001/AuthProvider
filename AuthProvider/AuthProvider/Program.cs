@@ -54,6 +54,7 @@ namespace AuthProvider
                        .SetRevocationEndpointUris("connect/revocation");
 
                     opt.SetRefreshTokenLifetime(TimeSpan.FromMinutes(10));
+                    opt.SetIssuer(new Uri("http://localhost:7082/"));
 
                     opt.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles, Scopes.OfflineAccess);
 
@@ -64,12 +65,24 @@ namespace AuthProvider
                         Convert.FromBase64String("DRjd/GnduI3Efzen9V9BvbNUfc/VKgXltV7Kbk9sMkY=")));
                     opt.AddDevelopmentSigningCertificate();
 
-                    opt.UseAspNetCore()
-                        .EnableAuthorizationEndpointPassthrough()
-                        .EnableEndSessionEndpointPassthrough()
-                        .EnableTokenEndpointPassthrough()
-                        .EnableUserInfoEndpointPassthrough()
-                        .EnableStatusCodePagesIntegration();
+                    if (builder.Environment.IsDevelopment())
+                    {
+                        opt.UseAspNetCore().DisableTransportSecurityRequirement()
+                            .EnableAuthorizationEndpointPassthrough()
+                            .EnableEndSessionEndpointPassthrough()
+                            .EnableTokenEndpointPassthrough()
+                            .EnableUserInfoEndpointPassthrough()
+                            .EnableStatusCodePagesIntegration();
+                    }
+                    else
+                    {
+                        opt.UseAspNetCore()
+                            .EnableAuthorizationEndpointPassthrough()
+                            .EnableEndSessionEndpointPassthrough()
+                            .EnableTokenEndpointPassthrough()
+                            .EnableUserInfoEndpointPassthrough()
+                            .EnableStatusCodePagesIntegration();
+                    }
                 })
                 .AddValidation(opt =>
                 {
@@ -98,7 +111,6 @@ namespace AuthProvider
                 app.UseStatusCodePagesWithReExecute("~/error");
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();

@@ -1,0 +1,66 @@
+services:
+  auth-server-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong@Password123
+    ports:
+      - "1433:1433"
+    volumes:  
+      - sql_data_auth_server:/var/opt/mssql
+
+  client-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong@Password123
+    ports:
+      - "1434:1433"
+    volumes:  
+      - sql_data_client:/var/opt/mssql
+
+  auth-server:
+    build:
+      context: .
+      dockerfile: AuthProvider.Dockerfile
+    environment:
+      - ConnectionStrings__AuthProviderDbContextConnection=Server=auth-server-db;Database=AuthProvider;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True
+      - OpenIddictServer__Authority=http://auth-server:8080
+      - OpenIddictServer__Clients__MvcClient__RedirectUri=http://localhost:7197/callback/login/local
+      - OpenIddictServer__Clients__MvcClient__PostLogoutRedirectUri=http://localhost:7197/callback/logout/local
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "7082:8080"
+    depends_on:
+      - auth-server-db
+
+  resource-server:
+    build:
+      context: .
+      dockerfile: AuthProvider.ResourceServer.Dockerfile
+    environment:
+      - OpenIddictValidation__Authority=http://auth-server:8080
+    ports:
+      - "7240:8080"
+    depends_on:
+      - auth-server
+
+  client:
+    build:
+      context: .
+      dockerfile: AuthProvider.Client.Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=client-db;Database=AuthProvider.Client;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True
+      - OpenIddictClient__Authority=http://auth-server:8080
+      - OpenIddictClient__ClientSecret=65bd1ee0-8d7c-4600-bb01-10f633ac1c8d
+      - OpenIddictClient__ClientId=mvc-client
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "7197:8080"
+    depends_on:
+      - auth-server
+      - client-db
+
+volumes:
+  sql_data_auth_server:
+  sql_data_client:
