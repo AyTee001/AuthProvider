@@ -1,6 +1,7 @@
 using AuthProvider.Data;
 using AuthProvider.Entities;
 using AuthProvider.Workers;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,17 @@ namespace AuthProvider
             var builder = WebApplication.CreateBuilder(args);
             var connectionString = builder.Configuration.GetConnectionString("AuthProviderDbContextConnection")
                 ?? throw new InvalidOperationException("Connection string 'AuthProviderDbContextConnection' not found.");
+            //TODO: refactor as an aid for local dev
+            var keysDirectoryName = "dp-keys";
+            var keysPath = Path.Combine(builder.Environment.ContentRootPath, keysDirectoryName);
+
+            if (!Directory.Exists(keysPath))
+            {
+                Directory.CreateDirectory(keysPath);
+            }
+            builder.Services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+                .SetApplicationName("Auth-Provider-System");
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();

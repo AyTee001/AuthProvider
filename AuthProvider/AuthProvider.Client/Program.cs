@@ -1,6 +1,9 @@
 using AuthProvider.Client.Data;
 using AuthProvider.Client.Http;
+using AuthProvider.Client.Workers;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Client;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -12,6 +15,18 @@ namespace AuthProvider.Client
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            //TODO: refactor as an aid for local dev
+
+            var keysDirectoryName = "dp-keys";
+            var keysPath = Path.Combine(builder.Environment.ContentRootPath, keysDirectoryName);
+
+            if (!Directory.Exists(keysPath))
+            {
+                Directory.CreateDirectory(keysPath);
+            }
+            builder.Services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+                .SetApplicationName("Auth-Provider-System");
 
             builder.Services.AddDbContext<ClientDbContext>(options =>
                 {
@@ -86,6 +101,8 @@ namespace AuthProvider.Client
                     });
 
                 });
+
+            builder.Services.AddHostedService<DbSetupWorker>();
 
             builder.Services.AddHttpClient<ResourceServerService>(client =>
             {

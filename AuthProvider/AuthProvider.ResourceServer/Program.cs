@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AuthProvider.ResourceServer
@@ -10,11 +12,22 @@ namespace AuthProvider.ResourceServer
 
             var authorityUri = builder.Configuration.GetRequiredSection("OpenIddictValidation").GetValue<string>("Authority")
                 ?? throw new ArgumentNullException("Auth server uri must be provided!");
+            //TODO: refactor as an aid for local dev
+            var keysDirectoryName = "dp-keys";
+            var keysPath = Path.Combine(builder.Environment.ContentRootPath, keysDirectoryName);
+
+            if (!Directory.Exists(keysPath))
+            {
+                Directory.CreateDirectory(keysPath);
+            }
+            builder.Services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+                .SetApplicationName("Auth-Provider-System");
 
             builder.Services.AddOpenIddict()
             .AddValidation(options =>
             {
-                options.SetIssuer("https://localhost:7082/");
+                options.SetIssuer(authorityUri);
 
                 options.AddEncryptionKey(new SymmetricSecurityKey(
                     Convert.FromBase64String("DRjd/GnduI3Efzen9V9BvbNUfc/VKgXltV7Kbk9sMkY=")));
