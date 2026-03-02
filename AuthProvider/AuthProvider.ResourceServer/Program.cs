@@ -12,25 +12,20 @@ namespace AuthProvider.ResourceServer
 
             var authorityUri = builder.Configuration.GetRequiredSection("OpenIddictValidation").GetValue<string>("Authority")
                 ?? throw new ArgumentNullException("Auth server uri must be provided!");
-            //TODO: refactor as an aid for local dev
-            var keysDirectoryName = "dp-keys";
-            var keysPath = Path.Combine(builder.Environment.ContentRootPath, keysDirectoryName);
+            var encryptionKey = builder.Configuration.GetRequiredSection("OpenIddictValidation").GetValue<string>("EncryptionKey")
+                ?? throw new ArgumentNullException("Token encryption key must be provided!");
 
-            if (!Directory.Exists(keysPath))
+            if (builder.Environment.IsDevelopment())
             {
-                Directory.CreateDirectory(keysPath);
+                builder.Services.AddDataProtection().SetApplicationName("Auth-Provider-System");
             }
-            builder.Services.AddDataProtection()
-                .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
-                .SetApplicationName("Auth-Provider-System");
 
             builder.Services.AddOpenIddict()
             .AddValidation(options =>
             {
                 options.SetIssuer(authorityUri);
 
-                options.AddEncryptionKey(new SymmetricSecurityKey(
-                    Convert.FromBase64String("DRjd/GnduI3Efzen9V9BvbNUfc/VKgXltV7Kbk9sMkY=")));
+                options.AddEncryptionKey(new SymmetricSecurityKey(Convert.FromBase64String(encryptionKey)));
 
                 options.UseSystemNetHttp();
 

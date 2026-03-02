@@ -6,8 +6,6 @@ services:
       - MSSQL_SA_PASSWORD=YourStrong@Password123
     volumes:  
       - sql_data_auth_server:/var/opt/mssql
-    networks:
-      - auth-provider-network
 
   client-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -16,8 +14,6 @@ services:
       - MSSQL_SA_PASSWORD=YourStrong@Password123
     volumes:  
       - sql_data_client:/var/opt/mssql
-    networks:
-      - auth-provider-network
 
   auth-server:
     build:
@@ -34,10 +30,8 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
     depends_on:
       - auth-server-db
-    networks:
-      - auth-provider-network
     volumes:
-      - ./keys/shared:/app/dp-keys
+      - dp-keys:/root/.aspnet/DataProtection-Keys
     extra_hosts:
       - "localhost:host-gateway"
 
@@ -53,10 +47,8 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
     depends_on:
       - auth-server
-    networks:
-      - auth-provider-network
     volumes:
-      - ./keys/shared:/app/dp-keys
+      - dp-keys:/root/.aspnet/DataProtection-Keys
     extra_hosts:
       - "localhost:host-gateway"
 
@@ -77,17 +69,12 @@ services:
     depends_on:
       - auth-server
       - client-db
-    networks:
-      - auth-provider-network
     volumes:
-      - ./keys/shared:/app/dp-keys
+      - dp-keys:/root/.aspnet/DataProtection-Keys
     extra_hosts:
       - "localhost:host-gateway"
 
 volumes:
   sql_data_auth_server:
   sql_data_client:
-
-networks:
-  auth-provider-network:
-    driver: bridge
+  dp-keys:

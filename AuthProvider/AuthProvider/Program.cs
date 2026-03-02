@@ -15,19 +15,16 @@ namespace AuthProvider
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
             var connectionString = builder.Configuration.GetConnectionString("AuthProviderDbContextConnection")
                 ?? throw new InvalidOperationException("Connection string 'AuthProviderDbContextConnection' not found.");
-            //TODO: refactor as an aid for local dev
-            var keysDirectoryName = "dp-keys";
-            var keysPath = Path.Combine(builder.Environment.ContentRootPath, keysDirectoryName);
+            var encryptionKey = builder.Configuration["OpenIddictServer:Clients:MvcClient:EncryptionKey"]
+                ?? throw new ArgumentNullException("Token encryption key must be provided!");
 
-            if (!Directory.Exists(keysPath))
+            if (builder.Environment.IsDevelopment())
             {
-                Directory.CreateDirectory(keysPath);
+                builder.Services.AddDataProtection().SetApplicationName("Auth-Provider-System");
             }
-            builder.Services.AddDataProtection()
-                .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
-                .SetApplicationName("Auth-Provider-System");
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -66,7 +63,6 @@ namespace AuthProvider
                        .SetRevocationEndpointUris("connect/revocation");
 
                     opt.SetRefreshTokenLifetime(TimeSpan.FromMinutes(10));
-                    opt.SetIssuer(new Uri("http://localhost:7082/"));
 
                     opt.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles, Scopes.OfflineAccess);
 
@@ -74,7 +70,7 @@ namespace AuthProvider
                     opt.AllowRefreshTokenFlow();
 
                     opt.AddEncryptionKey(new SymmetricSecurityKey(
-                        Convert.FromBase64String("DRjd/GnduI3Efzen9V9BvbNUfc/VKgXltV7Kbk9sMkY=")));
+                        Convert.FromBase64String(encryptionKey)));
                     opt.AddDevelopmentSigningCertificate();
 
                     if (builder.Environment.IsDevelopment())
@@ -88,12 +84,12 @@ namespace AuthProvider
                     }
                     else
                     {
-                        opt.UseAspNetCore()
-                            .EnableAuthorizationEndpointPassthrough()
-                            .EnableEndSessionEndpointPassthrough()
-                            .EnableTokenEndpointPassthrough()
-                            .EnableUserInfoEndpointPassthrough()
-                            .EnableStatusCodePagesIntegration();
+                    opt.UseAspNetCore()
+                        .EnableAuthorizationEndpointPassthrough()
+                        .EnableEndSessionEndpointPassthrough()
+                        .EnableTokenEndpointPassthrough()
+                        .EnableUserInfoEndpointPassthrough()
+                        .EnableStatusCodePagesIntegration();
                     }
                 })
                 .AddValidation(opt =>
