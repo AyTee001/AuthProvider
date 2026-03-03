@@ -1,9 +1,7 @@
 using AuthProvider.ResourceServer.Configuration;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using OpenIddict.Validation.AspNetCore;
 using System.ComponentModel.DataAnnotations;
 
@@ -46,28 +44,16 @@ namespace AuthProvider.ResourceServer
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(opt =>
             {
-                opt.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+                opt.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                 {
-                    Name = HeaderNames.Authorization,
                     Type = SecuritySchemeType.Http,
-                    Scheme = JwtBearerDefaults.AuthenticationScheme,
+                    Scheme = "bearer",
                     BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Please enter your Access Token below"
+                    Description = "JWT Authorization header using the Bearer scheme."
                 });
-
-                opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+                opt.AddSecurityRequirement(document => new OpenApiSecurityRequirement
                 {
-                    {
-                        new OpenApiSecurityScheme {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = JwtBearerDefaults.AuthenticationScheme
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
+                    [new OpenApiSecuritySchemeReference("bearer", document)] = []
                 });
             });
 
