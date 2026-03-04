@@ -1,13 +1,15 @@
-﻿using AuthProvider.Data;
+﻿using AuthProvider.Configuration;
+using AuthProvider.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace AuthProvider.Workers
 {
-    public class SeedWorker(IServiceProvider serviceProvider, IConfiguration configuration) : IHostedService
+    public class SeedWorker(IServiceProvider serviceProvider, IOptions<OpenIddictSettings> openIddictSettings) : IHostedService
     {
-        private readonly IConfiguration _configuration = configuration;
+        private readonly OpenIddictSettings _openIddictSettings = openIddictSettings.Value;
         private readonly IServiceProvider _serviceProvider = serviceProvider;
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -19,15 +21,10 @@ namespace AuthProvider.Workers
 
             var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
-            var clientId = _configuration["OpenIddictServer:Clients:MvcClient:ClientId"];
-            var redirectUri = _configuration["OpenIddictServer:Clients:MvcClient:RedirectUri"];
-            var postLogoutRedirectUri = _configuration["OpenIddictServer:Clients:MvcClient:PostLogoutRedirectUri"];
-            var clientSecret = _configuration["OpenIddictServer:Clients:MvcClient:ClientSecret"];
-
-            if(clientId is null || redirectUri is null || postLogoutRedirectUri is null || clientSecret is null)
-            {
-                throw new ArgumentNullException("Client id, redirect uri and post logout redirect uri must be provided");
-            }
+            var clientId = _openIddictSettings.Clients.MvcClient.ClientId;
+            var redirectUri = _openIddictSettings.Clients.MvcClient.RedirectUri;
+            var postLogoutRedirectUri = _openIddictSettings.Clients.MvcClient.PostLogoutRedirectUri;
+            var clientSecret = _openIddictSettings.Clients.MvcClient.ClientSecret;
 
             if (await manager.FindByClientIdAsync(clientId, cancellationToken) == null)
             {

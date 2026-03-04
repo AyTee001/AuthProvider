@@ -1,3 +1,4 @@
+using AuthProvider.Configuration;
 using AuthProvider.Data;
 using AuthProvider.Entities;
 using AuthProvider.Workers;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Quartz;
+using System.ComponentModel.DataAnnotations;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace AuthProvider
 {
@@ -16,15 +18,20 @@ namespace AuthProvider
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var openIddictSettings = new OpenIddictSettings();
+            builder.Configuration.GetRequiredSection(OpenIddictSettings.SectionName).Bind(openIddictSettings);
+            Validator.ValidateObject(openIddictSettings, new ValidationContext(openIddictSettings), true);
+
+            var dataProtectionSettings = new DataProtectionSettings();
+            builder.Configuration.GetRequiredSection(DataProtectionSettings.SectionName).Bind(dataProtectionSettings);
+            Validator.ValidateObject(dataProtectionSettings, new ValidationContext(dataProtectionSettings), true);
+
+            builder.Services.Configure<OpenIddictSettings>(builder.Configuration.GetSection(OpenIddictSettings.SectionName));
+
             var connectionString = builder.Configuration.GetConnectionString("AuthProviderDbContextConnection")
                 ?? throw new InvalidOperationException("Connection string 'AuthProviderDbContextConnection' not found.");
-            var encryptionKey = builder.Configuration["OpenIddictServer:Clients:MvcClient:EncryptionKey"]
-                ?? throw new ArgumentNullException("Token encryption key must be provided!");
 
-            if (builder.Environment.IsDevelopment())
-            {
-                builder.Services.AddDataProtection().SetApplicationName("Auth-Provider-System");
-            }
+                builder.Services.AddDataProtection().SetApplicationName(dataProtectionSettings.AppName);
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -41,18 +48,10 @@ namespace AuthProvider
                 .AddEntityFrameworkStores<AuthProviderDbContext>()
                 .AddDefaultTokenProviders();
 
-            builder.Services.AddQuartz(options =>
-            {
-                options.UseSimpleTypeLoader();
-                options.UseInMemoryStore();
-            });
-            builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
-
             builder.Services.AddOpenIddict()
                 .AddCore(opt =>
                 {
                     opt.UseEntityFrameworkCore().UseDbContext<AuthProviderDbContext>();
-                    opt.UseQuartz();
                 })
                 .AddServer(opt =>
                 {
@@ -62,7 +61,7 @@ namespace AuthProvider
                        .SetUserInfoEndpointUris("connect/userinfo")
                        .SetRevocationEndpointUris("connect/revocation");
 
-                    opt.SetRefreshTokenLifetime(TimeSpan.FromMinutes(10));
+                    opt.SetAccessTokenLifetime(TimeSpan.FromMinutes(10));
 
                     opt.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles, Scopes.OfflineAccess);
 
@@ -70,32 +69,21 @@ namespace AuthProvider
                     opt.AllowRefreshTokenFlow();
 
                     opt.AddEncryptionKey(new SymmetricSecurityKey(
-                        Convert.FromBase64String(encryptionKey)));
+                        Convert.FromBase64String(openIddictSettings.EncryptionKey)));
                     opt.AddDevelopmentSigningCertificate();
 
-                    if (builder.Environment.IsDevelopment())
-                    {
-                        opt.UseAspNetCore().DisableTransportSecurityRequirement()
-                            .EnableAuthorizationEndpointPassthrough()
-                            .EnableEndSessionEndpointPassthrough()
-                            .EnableTokenEndpointPassthrough()
-                            .EnableUserInfoEndpointPassthrough()
-                            .EnableStatusCodePagesIntegration();
-                    }
-                    else
-                    {
-                    opt.UseAspNetCore()
+
+                    var aspNetOptionsBuilder = opt.UseAspNetCore()
                         .EnableAuthorizationEndpointPassthrough()
                         .EnableEndSessionEndpointPassthrough()
                         .EnableTokenEndpointPassthrough()
                         .EnableUserInfoEndpointPassthrough()
                         .EnableStatusCodePagesIntegration();
+
+                    if (builder.Environment.IsDevelopment())
+                    {
+                        aspNetOptionsBuilder.DisableTransportSecurityRequirement();
                     }
-                })
-                .AddValidation(opt =>
-                {
-                    opt.UseLocalServer();
-                    opt.UseAspNetCore();
                 });
 
             builder.Services.ConfigureApplicationCookie(options =>
@@ -105,6 +93,7 @@ namespace AuthProvider
             });
 
             builder.Services.AddHostedService<SeedWorker>();
+            //Emailing is not used in the current version, but this stub ensures that default services that might use emailing remain content with the setup
             builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
 
             var app = builder.Build();
@@ -119,6 +108,7 @@ namespace AuthProvider
                 app.UseStatusCodePagesWithReExecute("~/error");
             }
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
