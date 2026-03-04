@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Quartz;
 using System.ComponentModel.DataAnnotations;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace AuthProvider

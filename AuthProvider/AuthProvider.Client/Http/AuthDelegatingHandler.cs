@@ -63,7 +63,11 @@ namespace AuthProvider.Client.Http
             var properties = new AuthenticationProperties(result.Properties);
             List<AuthenticationToken> tokens =
             [
-                new AuthenticationToken { Name = "access_token", Value = result.AccessToken },
+                new AuthenticationToken
+                {
+                    Name = OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken,
+                    Value = result.AccessToken
+                },
             ];
 
             if (result.RefreshToken != null)

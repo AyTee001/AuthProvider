@@ -53,18 +53,22 @@ namespace AuthProvider.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            ReturnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+
+                var emailStore = GetEmailStore();
+                await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    return LocalRedirect(ReturnUrl);
                 }
 
                 foreach (var error in result.Errors)
@@ -74,6 +78,16 @@ namespace AuthProvider.Areas.Identity.Pages.Account
             }
 
             return Page();
+        }
+
+
+        private IUserEmailStore<ApplicationUser> GetEmailStore()
+        {
+            if (!_userManager.SupportsUserEmail)
+            {
+                throw new NotSupportedException("Please enable email support for the current user store");
+            }
+            return (IUserEmailStore<ApplicationUser>)_userStore;
         }
     }
 }

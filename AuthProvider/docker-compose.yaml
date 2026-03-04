@@ -7,14 +7,6 @@ services:
     volumes:  
       - sql_data_auth_server:/var/opt/mssql
 
-  client-db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=YourStrong@Password123
-    volumes:  
-      - sql_data_client:/var/opt/mssql
-
   auth-server:
     build:
       context: .
@@ -59,7 +51,6 @@ services:
     ports:
       - "7197:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=Server=client-db;Database=AuthProvider.Client;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True
       - OpenIddictClient__Authority=http://localhost:7082
       - OpenIddictClient__ClientSecret=65bd1ee0-8d7c-4600-bb01-10f633ac1c8d
       - OpenIddictClient__ClientId=mvc-client
@@ -68,7 +59,6 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
     depends_on:
       - auth-server
-      - client-db
     volumes:
       - dp-keys:/root/.aspnet/DataProtection-Keys
     extra_hosts:
