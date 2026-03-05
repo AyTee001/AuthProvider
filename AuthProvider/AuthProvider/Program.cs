@@ -1,7 +1,6 @@
 using AuthProvider.Configuration;
 using AuthProvider.Data;
 using AuthProvider.Entities;
-using AuthProvider.Workers;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -38,7 +37,6 @@ namespace AuthProvider
 
             builder.Services.AddDbContext<AuthProviderDbContext>(options => {
                 options.UseSqlServer(connectionString);
-                options.UseOpenIddict();
             });
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -91,7 +89,6 @@ namespace AuthProvider
                 options.LogoutPath = "/Identity/Account/Logout";
             });
 
-            builder.Services.AddHostedService<SeedWorker>();
             //Emailing is not used in the current version, but this stub ensures that default services that might use emailing remain content with the setup
             builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
 

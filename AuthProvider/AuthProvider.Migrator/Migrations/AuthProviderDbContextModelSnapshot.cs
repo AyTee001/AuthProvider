@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AuthProvider.Migrations
+namespace AuthProvider.Migrator.Migrations
 {
     [DbContext(typeof(AuthProviderDbContext))]
     partial class AuthProviderDbContextModelSnapshot : ModelSnapshot
@@ -17,7 +17,7 @@ namespace AuthProvider.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.12")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);

@@ -1,5 +1,4 @@
 ﻿using AuthProvider.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,5 +9,6 @@ public class AuthProviderDbContext(DbContextOptions<AuthProviderDbContext> optio
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.UseOpenIddict();
     }
 }
