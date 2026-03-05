@@ -13,13 +13,13 @@ var builder = Host.CreateEmptyApplicationBuilder(new());
 var path = Directory.GetCurrentDirectory();
 builder.Configuration
     .SetBasePath(path)
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile("migrator.appsettings.json", optional: false, reloadOnChange: true)
     .AddEnvironmentVariables();
 
 var connectionString = builder.Configuration.GetConnectionString("AuthProviderDbContextConnection");
 
 builder.Services.AddDbContext<AuthProviderDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, x => x.MigrationsAssembly("AuthProvider.Migrator")));
 
 builder.Services.AddOpenIddict()
 .AddCore(options =>

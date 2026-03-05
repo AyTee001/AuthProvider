@@ -16,8 +16,6 @@ services:
     environment:
       - ConnectionStrings__AuthProviderDbContextConnection=Server=auth-server-db;Database=AuthProvider;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True
       - OpenIddictServer__Authority=http://localhost:7082
-      - OpenIddictServer__Clients__MvcClient__RedirectUri=http://localhost:7197/callback/login/local
-      - OpenIddictServer__Clients__MvcClient__PostLogoutRedirectUri=http://localhost:7197/callback/logout/local
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
     depends_on:
@@ -63,6 +61,18 @@ services:
       - dp-keys:/root/.aspnet/DataProtection-Keys
     extra_hosts:
       - "localhost:host-gateway"
+
+  migrator:
+    build:
+      context: .
+      dockerfile: AuthProvider.Migrator.Dockerfile
+
+    environment:
+      - ConnectionStrings__AuthProviderDbContextConnection=Server=auth-server-db;Database=AuthProvider;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True
+      - MvcDemoClient__RedirectUri=http://localhost:7197/callback/login/local
+      - MvcDemoClient__PostLogoutRedirectUri=http://localhost:7197/callback/logout/local
+    depends_on:
+      - auth-server-db
 
 volumes:
   sql_data_auth_server:
