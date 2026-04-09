@@ -7,14 +7,16 @@ skinparam classAttributeIconSize 0
 ' --- Identity Pages ---
 class PageModel <<framework>>
 
+
 ' --- Login Model ---
 class LoginModel {
     +Input: LoginInputModel
-    +ErrorMessage: string
+    +ErrorMessage: string?
+    +ReturnUrl: string?
     - _signInManager: SignInManager<ApplicationUser> {readOnly}
 
-    +OnGetAsync(string): Task
-    +OnPostAsync(string): Task<IActionResult>
+    +OnGet(string?): IActionResult
+    +OnPostAsync(string?): Task<IActionResult>
 }
 
 class LoginInputModel {
@@ -26,21 +28,33 @@ class LoginInputModel {
 LoginModel +-up- LoginInputModel
 PageModel <|-left- LoginModel
 
+' --- Logout Model ---'
+class LogoutModel {
+    +PostLogoutRedirectUri: string?
+    +ClientId: string?
+    +IdTokenHint: string?
+    +State: string?
+    - _signInManager: SignInManager<ApplicationUser> {readOnly}
+
+    +OnPostAsync(): Task<IActionResult>
+}
+
+PageModel <|-up- LogoutModel
+
+
 
 ' --- Register Model ---
 class RegisterModel {
-    - _signInManager: SignInManager<ApplicationUser>
-    - _userManager: UserManager<ApplicationUser>
-    - _userStore: IUserStore<ApplicationUser>
-    - _emailStore: IUserEmailStore<ApplicationUser>
-    - _emailSender: IEmailSender
+    - _signInManager: SignInManager<ApplicationUser> {readOnly}
+    - _userManager: UserManager<ApplicationUser> {readOnly}
+    - _userStore: IUserStore<ApplicationUser> {readOnly}
 
     +Input: RegisterInputModel
-    +ReturnUrl: string
+    +ReturnUrl: string?
 
-    +OnGetAsync(string): Task
-    +OnPostAsync(string): Task<IActionResult>
-    -CreateUser(): ApplicationUser
+    +OnGet(string?): IActionResult
+    +OnPostAsync(string?): Task<IActionResult>
+    -GetEmailStore(): IUserEmailStore<ApplicationUser>
 }
 
 class RegisterInputModel {
@@ -59,14 +73,14 @@ class IndexModel {
 
     +Input: IndexInputModel
     +Username: string
-    +StatusMessage: string
+    +StatusMessage: string?
     +OnGetAsync(): Task<IActionResult>
     +OnPostAsync(): Task<IActionResult>
     -LoadAsync(ApplicationUser): Task
 }
 
 class IndexInputModel {
-    +PhoneNumber: string
+    +PhoneNumber: string?
 }
 
 IndexModel +-- IndexInputModel

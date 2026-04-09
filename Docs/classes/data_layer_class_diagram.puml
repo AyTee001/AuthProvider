@@ -9,7 +9,7 @@ class "IdentityDbContext<ApplicationUser>" as IdentityDbContext <<framework>>
 class IdentityUser <<framework>>
 
 class AuthProviderDbContext {
-    + AuthProviderDbContext(DbContextOptions)
+    # OnModelCreating(ModelBuilder): void
 }
 
 class ApplicationUser

@@ -17,8 +17,6 @@ class AuthorizationController {
     +Authorize(): Task<IActionResult>
     +Accept(): Task<IActionResult>
     +Deny(): IActionResult
-    +Logout(): IActionResult
-    +LogoutPost(): Task<IActionResult>
     +Exchange(): Task<IActionResult>
     -CreateIdentityWithClaims(ApplicationUser, ClaimsPrincipal?): Task<ClaimsIdentity>
     -MustForceAuthentication(OpenIddictRequest?, AuthenticateResult?): bool
@@ -38,6 +36,8 @@ AuthorizationController ..> AuthorizeViewModel
 class AuthorizeViewModel <<ViewModel>> {
     +ApplicationName: string?
     +Scope: string?
+    +ScopeDisplayInfos: string[]
+    -GetScopeDisplayInfos(string?): string[]
 }
 
 class ErrorViewModel <<ViewModel>> {
